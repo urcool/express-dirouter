@@ -4,6 +4,7 @@ const router = require('express').Router()
 
 const log = (...arg) => console.log(`[${new Date().toLocaleString()}]`, ...arg)
 const extnameGet = filePath => fs.statSync(filePath).isDirectory() ? 'dir' : path.extname(filePath)
+const cwdPath = process.cwd()
 
 module.exports = class {
     constructor(options = {}) {
@@ -18,7 +19,7 @@ module.exports = class {
         return router
     }
     controllerBuilder(controllerDir) {
-        const baseDir = path.join(__dirname, ...controllerDir)
+        const baseDir = path.join(cwdPath, ...controllerDir)
         const files = fs.readdirSync(baseDir)
         const isFun = f => typeof f === 'function'
         files.forEach(file => {
@@ -29,7 +30,7 @@ module.exports = class {
                 if (typeof instance !== 'object') {
                     return false
                 }
-                const file = filePath.substring(__dirname.length + this.controllerDir.length + 1)
+                const file = filePath.substring(cwdPath.length + this.controllerDir.length + 1)
                 const routerPath = file.split(path.sep).join('/').substring(0, file.length - 3)
                 if (isFun(instance.get)) {
                     router.get(routerPath, instance.get.bind(this))
@@ -57,7 +58,7 @@ module.exports = class {
         });
     }
     serviceBuilder(serviceDir, service = {}) {
-        const baseDir = path.join(__dirname, ...serviceDir)
+        const baseDir = path.join(cwdPath, ...serviceDir)
         const files = fs.readdirSync(baseDir)
         files.forEach(file => {
             const filePath = path.join(baseDir, file)
